@@ -1,23 +1,67 @@
 {
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
   "prConcurrentLimit": 0,
   "rebaseWhen": "never",
-  "masterIssue": true,
-  "pip_requirements": {
-    "fileMatch": ["requirements-test.txt", "requirements-composer.txt", "constraints.txt", "constraints-test.txt"]
+  "dependencyDashboard": true,
+  "poetry": {
+    "fileMatch": [
+      "pyproject.toml"
+    ]
   },
-  "ignorePaths" : ["composer/**/constraints.txt", "composer/blog/**/constraints.txt", "composer/airflow_1_samples/requirements.txt"],
+  "pip_requirements": {
+    "fileMatch": [
+      "requirements-test.txt",
+      "requirements-composer.txt",
+      "constraints.txt",
+      "constraints-test.txt"
+    ]
+  },
+  "ignorePaths": [
+    "composer/**/constraints.txt",
+    "composer/blog/**/constraints.txt",
+    "composer/airflow_1_samples/requirements.txt",
+    "appengine/standard",
+    "dataflow/flex-templates/pipeline_with_dependencies/**",
+    "dataflow/gemma/**"
+  ],
   "packageRules": [
     {
-      "packagePatterns": ["pytest"],
-      "separateMinorPatch": true
+      "separateMinorPatch": true,
+      "matchPackageNames": [
+        "/pytest/"
+      ]
     },
     {
-      "packagePatterns": ["pytest"],
-      "updateTypes": ["patch"],
-      "enabled": false
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "enabled": false,
+      "matchPackageNames": [
+        "/pytest/"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "extends": [
+        "schedule:monthly"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "extends": [
+        "schedule:quarterly"
+      ]
     }
-  ]
+  ],
+  "vulnerabilityAlerts": {
+    "schedule": [
+      "at any time"
+    ]
+  }
 }

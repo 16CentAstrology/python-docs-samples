@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# All rights reserved.
 
-import mock
+from unittest import mock
 
 import main
 

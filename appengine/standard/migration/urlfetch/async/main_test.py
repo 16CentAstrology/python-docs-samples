@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import main
-import pytest
 import sys
+
+import pytest
+
+import main
 
 
 @pytest.mark.skipif(sys.version_info < (3, 0), reason="no urlfetch adapter in test env")
@@ -22,13 +24,13 @@ def test_index():
     main.app.testing = True
     client = main.app.test_client()
 
-    r = client.get('/')
+    r = client.get("/")
     assert r.status_code == 200
-    assert 'Google is built by a large team ' in r.data.decode('utf-8')
+    assert "Google is built by a large team " in r.data.decode("utf-8")
 
-    r = client.get('/callback')
+    r = client.get("/callback")
     assert r.status_code == 200
-    assert 'Response number 1 is ' in r.data.decode('utf-8')
-    assert 'Response number 2 is ' in r.data.decode('utf-8')
-    assert 'Response number 3 is ' in r.data.decode('utf-8')
-    assert 'Response number 4 is ' in r.data.decode('utf-8')
+    assert "Response number 1 is " in r.data.decode("utf-8")
+    assert "Response number 2 is " in r.data.decode("utf-8")
+    assert "Response number 3 is " in r.data.decode("utf-8")
+    assert "Response number 4 is " in r.data.decode("utf-8")

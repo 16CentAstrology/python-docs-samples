@@ -1,4 +1,4 @@
-# Copyright 2016 Google Inc. All rights reserved.
+# Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ import webapp2
 
 
 def send_approved_mail(sender_address):
-    # [START send_message]
+    # [START gae_mail_send_approved_message]
     message = mail.EmailMessage(
-        sender=sender_address,
-        subject="Your account has been approved")
+        sender=sender_address, subject="Your account has been approved"
+    )
 
     message.to = "Albert Johnson <Albert.Johnson@example.com>"
     message.body = """Dear Albert:
@@ -35,17 +35,21 @@ Please let us know if you have any questions.
 The example.com Team
 """
     message.send()
-    # [END send_message]
+    # [END gae_mail_send_approved_message]
 
 
 class SendMessageHandler(webapp2.RequestHandler):
     def get(self):
-        send_approved_mail('example@{}.appspotmail.com'.format(
-            app_identity.get_application_id()))
-        self.response.content_type = 'text/plain'
-        self.response.write('Sent an email message to Albert.')
+        send_approved_mail(
+            "example@{}.appspotmail.com".format(app_identity.get_application_id())
+        )
+        self.response.content_type = "text/plain"
+        self.response.write("Sent an email message to Albert.")
 
 
-app = webapp2.WSGIApplication([
-    ('/send_message', SendMessageHandler),
-], debug=True)
+app = webapp2.WSGIApplication(
+    [
+        ("/send_message", SendMessageHandler),
+    ],
+    debug=True,
+)

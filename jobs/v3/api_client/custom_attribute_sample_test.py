@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC. All Rights Reserved.
+# Copyright 2018 Google LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,9 +32,11 @@ def test_custom_attribute_sample(create_data, capsys):
     def eventually_consistent_test():
         custom_attribute_sample.run_sample()
         out, _ = capsys.readouterr()
-        expected = ('.*matchingJobs.*job_with_custom_attributes.*\n'
-                    '.*matchingJobs.*job_with_custom_attributes.*\n'
-                    '.*matchingJobs.*job_with_custom_attributes.*\n')
+        expected = (
+            ".*matchingJobs.*job_with_custom_attributes.*\n"
+            ".*matchingJobs.*job_with_custom_attributes.*\n"
+            ".*matchingJobs.*job_with_custom_attributes.*\n"
+        )
         assert re.search(expected, out, re.DOTALL)
 
     eventually_consistent_test()

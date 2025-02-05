@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC All Rights Reserved.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ def airflow_database():
     # We use separate directory for local db path per session
     # by setting AIRFLOW_HOME env var, which is done in noxfile_config.py.
 
-    assert 'AIRFLOW_HOME' in os.environ
+    assert "AIRFLOW_HOME" in os.environ
 
     airflow_home = os.environ["AIRFLOW_HOME"]
     airflow_db = f"{airflow_home}/airflow.db"
@@ -40,6 +40,7 @@ def airflow_database():
     # Making sure we are using a data file there.
     assert os.path.isfile(airflow_db)
 
+
 # this fixture initializes the Airflow DB once per session
 # it is used by DAGs in both the blogs and workflows directories
 @pytest.fixture(scope="session")
@@ -49,7 +50,7 @@ def airflow_database():
     # We use separate directory for local db path per session
     # by setting AIRFLOW_HOME env var, which is done in noxfile_config.py.
 
-    assert 'AIRFLOW_HOME' in os.environ
+    assert "AIRFLOW_HOME" in os.environ
 
     airflow_home = os.environ["AIRFLOW_HOME"]
     airflow_db = f"{airflow_home}/airflow.db"

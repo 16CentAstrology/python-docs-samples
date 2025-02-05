@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,22 +132,18 @@ function initGame(gameKey, me, token, channelId, initialMessage) {
    * finally, it calls onOpened() to let the server know it is ready to receive messages
    */
   function openChannel() {
-    // [START auth_login]
     // sign into Firebase with the token passed from the server
     firebase.auth().signInWithCustomToken(token).catch(function(error) {
       console.log('Login Failed!', error.code);
       console.log('Error message: ', error.message);
     });
-    // [END auth_login]
 
-    // [START add_listener]
     // setup a database reference at path /channels/channelId
     channel = firebase.database().ref('channels/' + channelId);
     // add a listener to the path that fires any time the value of the data changes
     channel.on('value', function(data) {
       onMessage(data.val());
     });
-    // [END add_listener]
     onOpened();
     // let the server know that the channel is open
   }

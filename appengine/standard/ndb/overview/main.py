@@ -1,4 +1,4 @@
-# Copyright 2015 Google Inc. All rights reserved.
+# Copyright 2015 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ This sample is used on this page:
 For more information, see README.md
 """
 
-# [START all]
+# [START gae_ndb_overview]
 import cgi
 import textwrap
 import urllib
@@ -30,14 +30,15 @@ from google.appengine.ext import ndb
 import webapp2
 
 
-# [START greeting]
+# [START gae_ndb_overview_greeting]
 class Greeting(ndb.Model):
     """Models an individual Guestbook entry with content and date."""
+
     content = ndb.StringProperty()
     date = ndb.DateTimeProperty(auto_now_add=True)
-# [END greeting]
+    # [END gae_ndb_overview_greeting]
 
-# [START query]
+    # [START gae_ndb_overview_query]
     @classmethod
     def query_book(cls, ancestor_key):
         return cls.query(ancestor=ancestor_key).order(-cls.date)
@@ -45,18 +46,21 @@ class Greeting(ndb.Model):
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
-        self.response.out.write('<html><body>')
-        guestbook_name = self.request.get('guestbook_name')
+        self.response.out.write("<html><body>")
+        guestbook_name = self.request.get("guestbook_name")
         ancestor_key = ndb.Key("Book", guestbook_name or "*notitle*")
         greetings = Greeting.query_book(ancestor_key).fetch(20)
-# [END query]
+        # [END gae_ndb_overview_query]
 
         greeting_blockquotes = []
         for greeting in greetings:
             greeting_blockquotes.append(
-                '<blockquote>%s</blockquote>' % cgi.escape(greeting.content))
+                "<blockquote>%s</blockquote>" % cgi.escape(greeting.content)
+            )
 
-        self.response.out.write(textwrap.dedent("""\
+        self.response.out.write(
+            textwrap.dedent(
+                """\
             <html>
               <body>
                 {blockquotes}
@@ -76,29 +80,29 @@ class MainPage(webapp2.RequestHandler):
                     <input type="submit" value="switch">
                 </form>
               </body>
-            </html>""").format(
-                blockquotes='\n'.join(greeting_blockquotes),
-                sign=urllib.urlencode({'guestbook_name': guestbook_name}),
-                guestbook_name=cgi.escape(guestbook_name)))
+            </html>"""
+            ).format(
+                blockquotes="\n".join(greeting_blockquotes),
+                sign=urllib.urlencode({"guestbook_name": guestbook_name}),
+                guestbook_name=cgi.escape(guestbook_name),
+            )
+        )
 
 
-# [START submit]
+# [START gae_ndb_overview_submit]
 class SubmitForm(webapp2.RequestHandler):
     def post(self):
         # We set the parent key on each 'Greeting' to ensure each guestbook's
         # greetings are in the same entity group.
-        guestbook_name = self.request.get('guestbook_name')
-        greeting = Greeting(parent=ndb.Key("Book",
-                                           guestbook_name or "*notitle*"),
-                            content=self.request.get('content'))
+        guestbook_name = self.request.get("guestbook_name")
+        greeting = Greeting(
+            parent=ndb.Key("Book", guestbook_name or "*notitle*"),
+            content=self.request.get("content"),
+        )
         greeting.put()
-# [END submit]
-        self.redirect('/?' + urllib.urlencode(
-            {'guestbook_name': guestbook_name}))
+        # [END gae_ndb_overview_submit]
+        self.redirect("/?" + urllib.urlencode({"guestbook_name": guestbook_name}))
 
 
-app = webapp2.WSGIApplication([
-    ('/', MainPage),
-    ('/sign', SubmitForm)
-])
-# [END all]
+app = webapp2.WSGIApplication([("/", MainPage), ("/sign", SubmitForm)])
+# [END gae_ndb_overview]

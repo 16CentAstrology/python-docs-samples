@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2015 Google Inc. All Rights Reserved.
+# Copyright 2015 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START startup_script]
 apt-get update
 apt-get -y install imagemagick
 
@@ -36,5 +35,3 @@ gsutil mb gs://$CS_BUCKET
 # Store the image in the Google Cloud Storage bucket and allow all users
 # to read it.
 gsutil cp -a public-read output.png gs://$CS_BUCKET/output.png
-
-# [END startup_script]

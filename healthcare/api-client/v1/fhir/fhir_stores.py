@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC All Rights Reserved.
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ def create_fhir_store(project_id, location, dataset_id, fhir_store_id, version):
     )
 
     response = request.execute()
-    print("Created FHIR store: {}".format(fhir_store_id))
+    print(f"Created FHIR store: {fhir_store_id}")
 
     return response
 
@@ -83,7 +83,7 @@ def delete_fhir_store(project_id, location, dataset_id, fhir_store_id):
     fhir_store_parent = "projects/{}/locations/{}/datasets/{}".format(
         project_id, location, dataset_id
     )
-    fhir_store_name = "{}/fhirStores/{}".format(fhir_store_parent, fhir_store_id)
+    fhir_store_name = f"{fhir_store_parent}/fhirStores/{fhir_store_id}"
 
     request = (
         client.projects()
@@ -94,7 +94,7 @@ def delete_fhir_store(project_id, location, dataset_id, fhir_store_id):
     )
 
     response = request.execute()
-    print("Deleted FHIR store: {}".format(fhir_store_id))
+    print(f"Deleted FHIR store: {fhir_store_id}")
 
     return response
 
@@ -128,7 +128,7 @@ def get_fhir_store(project_id, location, dataset_id, fhir_store_id):
     fhir_store_parent = "projects/{}/locations/{}/datasets/{}".format(
         project_id, location, dataset_id
     )
-    fhir_store_name = "{}/fhirStores/{}".format(fhir_store_parent, fhir_store_id)
+    fhir_store_name = f"{fhir_store_parent}/fhirStores/{fhir_store_id}"
 
     fhir_stores = client.projects().locations().datasets().fhirStores()
     fhir_store = fhir_stores.get(name=fhir_store_name).execute()
@@ -168,7 +168,7 @@ def get_fhir_store_metadata(project_id, location, dataset_id, fhir_store_id):
     fhir_store_parent = "projects/{}/locations/{}/datasets/{}".format(
         project_id, location, dataset_id
     )
-    fhir_store_name = "{}/fhirStores/{}".format(fhir_store_parent, fhir_store_id)
+    fhir_store_name = f"{fhir_store_parent}/fhirStores/{fhir_store_id}"
 
     fhir_stores = client.projects().locations().datasets().fhirStores()
     response = fhir_stores.fhir().capabilities(name=fhir_store_name).execute()
@@ -223,7 +223,7 @@ def list_fhir_stores(project_id, location, dataset_id):
 
 
 # [START healthcare_patch_fhir_store]
-def patch_fhir_store(project_id, location, dataset_id, fhir_store_id):
+def patch_fhir_store(project_id, location, dataset_id, fhir_store_id, pubsub_topic):
     """Updates the FHIR store.
 
     See https://github.com/GoogleCloudPlatform/python-docs-samples/tree/main/healthcare/api-client/v1/fhir
@@ -242,24 +242,28 @@ def patch_fhir_store(project_id, location, dataset_id, fhir_store_id):
     # location = 'us-central1'  # replace with the dataset's location
     # dataset_id = 'my-dataset'  # replace with your dataset ID
     # fhir_store_id = 'my-fhir-store'  # replace with the FHIR store's ID
+    # pubsub_topic = 'projects/{project_id}/topics/{topic_id}'  # replace with your Pub/Sub topic
     fhir_store_parent = "projects/{}/locations/{}/datasets/{}".format(
         project_id, location, dataset_id
     )
-    fhir_store_name = "{}/fhirStores/{}".format(fhir_store_parent, fhir_store_id)
+    fhir_store_name = f"{fhir_store_parent}/fhirStores/{fhir_store_id}"
 
-    # TODO(developer): Replace with the full URI of an existing Pub/Sub topic
-    patch = {"notificationConfig": None}
+    patch = {
+        "notificationConfigs": [{"pubsubTopic": pubsub_topic}] if pubsub_topic else []
+    }
 
     request = (
         client.projects()
         .locations()
         .datasets()
         .fhirStores()
-        .patch(name=fhir_store_name, updateMask="notificationConfig", body=patch)
+        .patch(name=fhir_store_name, updateMask="notificationConfigs", body=patch)
     )
 
     response = request.execute()
-    print("Patched FHIR store {} with Cloud Pub/Sub topic: None".format(fhir_store_id))
+    print(
+        f"Patched FHIR store {fhir_store_id} with Cloud Pub/Sub topic: {pubsub_topic or 'None'}"
+    )
 
     return response
 
@@ -292,9 +296,9 @@ def export_fhir_store_gcs(project_id, location, dataset_id, fhir_store_id, gcs_u
     fhir_store_parent = "projects/{}/locations/{}/datasets/{}".format(
         project_id, location, dataset_id
     )
-    fhir_store_name = "{}/fhirStores/{}".format(fhir_store_parent, fhir_store_id)
+    fhir_store_name = f"{fhir_store_parent}/fhirStores/{fhir_store_id}"
 
-    body = {"gcsDestination": {"uriPrefix": "gs://{}/fhir_export".format(gcs_uri)}}
+    body = {"gcsDestination": {"uriPrefix": f"gs://{gcs_uri}/fhir_export"}}
 
     request = (
         client.projects()
@@ -305,7 +309,7 @@ def export_fhir_store_gcs(project_id, location, dataset_id, fhir_store_id, gcs_u
     )
 
     response = request.execute()
-    print("Exported FHIR resources to bucket: gs://{}".format(gcs_uri))
+    print(f"Exported FHIR resources to bucket: gs://{gcs_uri}")
 
     return response
 
@@ -338,11 +342,11 @@ def import_fhir_resources(project_id, location, dataset_id, fhir_store_id, gcs_u
     fhir_store_parent = "projects/{}/locations/{}/datasets/{}".format(
         project_id, location, dataset_id
     )
-    fhir_store_name = "{}/fhirStores/{}".format(fhir_store_parent, fhir_store_id)
+    fhir_store_name = f"{fhir_store_parent}/fhirStores/{fhir_store_id}"
 
     body = {
         "contentStructure": "CONTENT_STRUCTURE_UNSPECIFIED",
-        "gcsSource": {"uri": "gs://{}".format(gcs_uri)},
+        "gcsSource": {"uri": f"gs://{gcs_uri}"},
     }
 
     # Escape "import()" method keyword because "import"
@@ -356,7 +360,7 @@ def import_fhir_resources(project_id, location, dataset_id, fhir_store_id, gcs_u
     )
 
     response = request.execute()
-    print("Imported FHIR resources: {}".format(gcs_uri))
+    print(f"Imported FHIR resources: {gcs_uri}")
 
     return response
 
@@ -387,7 +391,7 @@ def get_fhir_store_iam_policy(project_id, location, dataset_id, fhir_store_id):
     fhir_store_parent = "projects/{}/locations/{}/datasets/{}".format(
         project_id, location, dataset_id
     )
-    fhir_store_name = "{}/fhirStores/{}".format(fhir_store_parent, fhir_store_id)
+    fhir_store_name = f"{fhir_store_parent}/fhirStores/{fhir_store_id}"
 
     request = (
         client.projects()
@@ -448,7 +452,7 @@ def set_fhir_store_iam_policy(
     fhir_store_parent = "projects/{}/locations/{}/datasets/{}".format(
         project_id, location, dataset_id
     )
-    fhir_store_name = "{}/fhirStores/{}".format(fhir_store_parent, fhir_store_id)
+    fhir_store_name = f"{fhir_store_parent}/fhirStores/{fhir_store_id}"
 
     policy = {"bindings": [{"role": role, "members": [member]}]}
 

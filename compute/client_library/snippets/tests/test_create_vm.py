@@ -17,6 +17,9 @@ import google.auth
 from google.cloud import compute_v1
 import pytest
 
+from .test_disks import autodelete_regional_blank_disk  # noqa: F401
+from .test_disks import DISK_SIZE
+
 from ..disks.create_empty_disk import create_empty_disk
 from ..disks.create_from_image import create_disk_from_image
 from ..disks.delete import delete_disk
@@ -31,18 +34,27 @@ from ..instances.create_start_instance.create_from_snapshot import create_from_s
 from ..instances.create_start_instance.create_with_additional_disk import (
     create_with_additional_disk,
 )
-from ..instances.create_start_instance.create_with_existing_disks import create_with_existing_disks
+from ..instances.create_start_instance.create_with_existing_disks import (
+    create_with_existing_disks,
+)
 from ..instances.create_start_instance.create_with_local_ssd import create_with_ssd
+from ..instances.create_start_instance.create_with_regional_disk import (
+    create_with_regional_boot_disk,
+)
 from ..instances.create_start_instance.create_with_snapshotted_data_disk import (
     create_with_snapshotted_data_disk,
 )
 from ..instances.create_with_subnet import create_with_subnet
 from ..instances.delete import delete_instance
 from ..operations.operation_check import wait_for_operation
+from ..snapshots.create import create_snapshot
+
 
 PROJECT = google.auth.default()[1]
 REGION = "us-central1"
+REGION_SECOND = "europe-west2"
 INSTANCE_ZONE = "us-central1-b"
+INSTANCE_ZONE_SECOND = "europe-west2-b"
 
 
 def get_active_debian():
@@ -87,9 +99,7 @@ def snapshot(src_disk):
     )
     wait_for_operation(op, PROJECT)
     try:
-        snapshot = snapshot_client.get(
-            project=PROJECT, snapshot=snapshot.name
-        )
+        snapshot = snapshot_client.get(project=PROJECT, snapshot=snapshot.name)
 
         yield snapshot
     finally:
@@ -118,9 +128,14 @@ def image(src_disk):
 def boot_disk():
     debian_image = get_active_debian()
     disk_name = "test-disk-" + uuid.uuid4().hex[:10]
-    disk = create_disk_from_image(PROJECT, INSTANCE_ZONE, disk_name,
-                                  f"zones/{INSTANCE_ZONE}/diskTypes/pd-standard",
-                                  13, debian_image.self_link)
+    disk = create_disk_from_image(
+        PROJECT,
+        INSTANCE_ZONE,
+        disk_name,
+        f"zones/{INSTANCE_ZONE}/diskTypes/pd-standard",
+        13,
+        debian_image.self_link,
+    )
     yield disk
     delete_disk(PROJECT, INSTANCE_ZONE, disk_name)
 
@@ -128,9 +143,13 @@ def boot_disk():
 @pytest.fixture()
 def empty_disk():
     disk_name = "test-disk-" + uuid.uuid4().hex[:10]
-    disk = create_empty_disk(PROJECT, INSTANCE_ZONE, disk_name,
-                             f"zones/{INSTANCE_ZONE}/diskTypes/pd-standard",
-                             14)
+    disk = create_empty_disk(
+        PROJECT,
+        INSTANCE_ZONE,
+        disk_name,
+        f"zones/{INSTANCE_ZONE}/diskTypes/pd-standard",
+        14,
+    )
 
     yield disk
     delete_disk(PROJECT, INSTANCE_ZONE, disk_name)
@@ -142,9 +161,7 @@ def test_create_from_custom_image(image):
         PROJECT, INSTANCE_ZONE, instance_name, image.self_link
     )
     try:
-        assert (
-            instance.disks[0].disk_size_gb == 10
-        )
+        assert instance.disks[0].disk_size_gb == 10
     finally:
         delete_instance(PROJECT, INSTANCE_ZONE, instance_name)
 
@@ -168,9 +185,7 @@ def test_create_from_snapshot(snapshot):
         PROJECT, INSTANCE_ZONE, instance_name, snapshot.self_link
     )
     try:
-        assert (
-            instance.disks[0].disk_size_gb == 20
-        )
+        assert instance.disks[0].disk_size_gb == 20
     finally:
         delete_instance(PROJECT, INSTANCE_ZONE, instance_name)
 
@@ -179,12 +194,8 @@ def test_create_with_additional_disk():
     instance_name = "i" + uuid.uuid4().hex[:10]
     instance = create_with_additional_disk(PROJECT, INSTANCE_ZONE, instance_name)
     try:
-        assert any(
-            disk.disk_size_gb == 20 for disk in instance.disks
-        )
-        assert any(
-            disk.disk_size_gb == 25 for disk in instance.disks
-        )
+        assert any(disk.disk_size_gb == 20 for disk in instance.disks)
+        assert any(disk.disk_size_gb == 25 for disk in instance.disks)
         assert len(instance.disks) == 2
     finally:
         delete_instance(PROJECT, INSTANCE_ZONE, instance_name)
@@ -196,12 +207,8 @@ def test_create_with_snapshotted_data_disk(snapshot):
         PROJECT, INSTANCE_ZONE, instance_name, snapshot.self_link
     )
     try:
-        assert any(
-            disk.disk_size_gb == 11 for disk in instance.disks
-        )
-        assert any(
-            disk.disk_size_gb == 10 for disk in instance.disks
-        )
+        assert any(disk.disk_size_gb == 11 for disk in instance.disks)
+        assert any(disk.disk_size_gb == 10 for disk in instance.disks)
         assert len(instance.disks) == 2
     finally:
         delete_instance(PROJECT, INSTANCE_ZONE, instance_name)
@@ -217,9 +224,11 @@ def test_create_with_subnet():
         f"regions/{REGION}/subnetworks/default",
     )
     try:
-        assert instance.network_interfaces[0].network.endswith("global/networks/default")
-        assert (
-            instance.network_interfaces[0].subnetwork.endswith(f"regions/{REGION}/subnetworks/default")
+        assert instance.network_interfaces[0].network.endswith(
+            "global/networks/default"
+        )
+        assert instance.network_interfaces[0].subnetwork.endswith(
+            f"regions/{REGION}/subnetworks/default"
         )
     finally:
         delete_instance(PROJECT, INSTANCE_ZONE, instance_name)
@@ -227,16 +236,13 @@ def test_create_with_subnet():
 
 def test_create_with_existing_disks(boot_disk, empty_disk):
     instance_name = "i" + uuid.uuid4().hex[:10]
-    instance = create_with_existing_disks(PROJECT, INSTANCE_ZONE, instance_name,
-                                          [boot_disk.name, empty_disk.name])
+    instance = create_with_existing_disks(
+        PROJECT, INSTANCE_ZONE, instance_name, [boot_disk.name, empty_disk.name]
+    )
 
     try:
-        assert any(
-            disk.disk_size_gb == 13 for disk in instance.disks
-        )
-        assert any(
-            disk.disk_size_gb == 14 for disk in instance.disks
-        )
+        assert any(disk.disk_size_gb == 13 for disk in instance.disks)
+        assert any(disk.disk_size_gb == 14 for disk in instance.disks)
         assert len(instance.disks) == 2
     finally:
         delete_instance(PROJECT, INSTANCE_ZONE, instance_name)
@@ -254,3 +260,26 @@ def test_create_with_ssd():
         assert len(instance.disks) == 2
     finally:
         delete_instance(PROJECT, INSTANCE_ZONE, instance_name)
+
+
+def test_create_with_regional_boot_disk(autodelete_regional_blank_disk):  # noqa: F811
+    snapshot_name = "test-snap-" + uuid.uuid4().hex[:10]
+    instance_name = "test-vm-" + uuid.uuid4().hex[:10]
+    test_snapshot = create_snapshot(
+        project_id=PROJECT,
+        disk_name=autodelete_regional_blank_disk.name,
+        snapshot_name=snapshot_name,
+        region=REGION_SECOND,
+    )
+    instance = create_with_regional_boot_disk(
+        PROJECT, INSTANCE_ZONE_SECOND, instance_name, test_snapshot.name, REGION_SECOND
+    )
+    # Disk size takes from test_disk.py
+    try:
+        assert any(disk.disk_size_gb == DISK_SIZE for disk in instance.disks)
+    finally:
+        delete_instance(PROJECT, INSTANCE_ZONE_SECOND, instance_name)
+        op = compute_v1.SnapshotsClient().delete_unary(
+            project=PROJECT, snapshot=snapshot_name
+        )
+        wait_for_operation(op, PROJECT)

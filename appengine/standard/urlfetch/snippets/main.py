@@ -1,4 +1,4 @@
-# Copyright 2016 Google Inc. All rights reserved.
+# Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,44 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Sample application that demonstrates different ways of fetching
-URLS on App Engine
+"""Sample application that demonstrates different ways of fetching
+URLS on App Engine.
 """
 
 import logging
 import urllib
 
-# [START urllib2-imports]
+# [START gae_urlfetch_snippets_imports_urllib2]
 import urllib2
-# [END urllib2-imports]
+# [END gae_urlfetch_snippets_imports_urllib2]
 
-# [START urlfetch-imports]
+# [START gae_urlfetch_snippets_imports_urlfetch]
 from google.appengine.api import urlfetch
-# [END urlfetch-imports]
+# [END gae_urlfetch_snippets_imports_urlfetch]
+
 import webapp2
 
 
 class UrlLibFetchHandler(webapp2.RequestHandler):
-    """ Demonstrates an HTTP query using urllib2"""
+    """Demonstrates an HTTP query using urllib2."""
 
     def get(self):
-        # [START urllib-get]
-        url = 'http://www.google.com/humans.txt'
+        # [START gae_urlfetch_snippets_urllib2_get]
+        url = "http://www.google.com/humans.txt"
         try:
             result = urllib2.urlopen(url)
             self.response.write(result.read())
         except urllib2.URLError:
-            logging.exception('Caught exception fetching url')
-        # [END urllib-get]
+            logging.exception("Caught exception fetching url")
+        # [END gae_urlfetch_snippets_urllib2_get]
 
 
 class UrlFetchHandler(webapp2.RequestHandler):
-    """ Demonstrates an HTTP query using urlfetch"""
+    """Demonstrates an HTTP query using urlfetch."""
 
     def get(self):
-        # [START urlfetch-get]
-        url = 'http://www.google.com/humans.txt'
+        # [START gae_urlfetch_snippets_urlfetch_get]
+        url = "http://www.google.com/humans.txt"
         try:
             result = urlfetch.fetch(url)
             if result.status_code == 200:
@@ -57,44 +57,48 @@ class UrlFetchHandler(webapp2.RequestHandler):
             else:
                 self.response.status_code = result.status_code
         except urlfetch.Error:
-            logging.exception('Caught exception fetching url')
-        # [END urlfetch-get]
+            logging.exception("Caught exception fetching url")
+        # [END gae_urlfetch_snippets_urlfetch_get]
 
 
 class UrlPostHandler(webapp2.RequestHandler):
-    """ Demonstrates an HTTP POST form query using urlfetch"""
+    """Demonstrates an HTTP POST form query using urlfetch."""
 
     form_fields = {
-        'first_name': 'Albert',
-        'last_name': 'Johnson',
+        "first_name": "Albert",
+        "last_name": "Johnson",
     }
 
     def get(self):
-        # [START urlfetch-post]
+        # [START gae_urlfetch_snippets_urlfetch_post]
         try:
             form_data = urllib.urlencode(UrlPostHandler.form_fields)
-            headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+            headers = {"Content-Type": "application/x-www-form-urlencoded"}
             result = urlfetch.fetch(
-                url='http://localhost:8080/submit_form',
+                url="http://localhost:8080/submit_form",
                 payload=form_data,
                 method=urlfetch.POST,
-                headers=headers)
+                headers=headers,
+            )
             self.response.write(result.content)
         except urlfetch.Error:
-            logging.exception('Caught exception fetching url')
-        # [END urlfetch-post]
+            logging.exception("Caught exception fetching url")
+        # [END gae_urlfetch_snippets_urlfetch_post]
 
 
 class SubmitHandler(webapp2.RequestHandler):
-    """ Handler that receives UrlPostHandler POST request"""
+    """Handler that receives UrlPostHandler POST request."""
 
     def post(self):
-        self.response.out.write((self.request.get('first_name')))
+        self.response.out.write((self.request.get("first_name")))
 
 
-app = webapp2.WSGIApplication([
-    ('/', UrlLibFetchHandler),
-    ('/url_fetch', UrlFetchHandler),
-    ('/url_post', UrlPostHandler),
-    ('/submit_form', SubmitHandler)
-], debug=True)
+app = webapp2.WSGIApplication(
+    [
+        ("/", UrlLibFetchHandler),
+        ("/url_fetch", UrlFetchHandler),
+        ("/url_post", UrlPostHandler),
+        ("/submit_form", SubmitHandler),
+    ],
+    debug=True,
+)

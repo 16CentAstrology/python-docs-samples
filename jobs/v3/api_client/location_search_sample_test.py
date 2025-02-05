@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC. All Rights Reserved.
+# Copyright 2018 Google LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,17 +32,21 @@ def test_location_search_sample(company_name, capsys):
     def eventually_consistent_test():
         location_search_sample.run_sample(company_name)
         out, _ = capsys.readouterr()
-        expected = ('.*locationFilters.*\n'
-                    '.*locationFilters.*\n'
-                    '.*locationFilters.*\n'
-                    '.*locationFilters.*\n'
-                    '.*locationFilters.*\n')
+        expected = (
+            ".*locationFilters.*\n"
+            ".*locationFilters.*\n"
+            ".*locationFilters.*\n"
+            ".*locationFilters.*\n"
+            ".*locationFilters.*\n"
+        )
         assert re.search(expected, out, re.DOTALL)
-        expected = ('.*matchingJobs.*\n'
-                    '.*matchingJobs.*\n'
-                    '.*matchingJobs.*\n'
-                    '.*matchingJobs.*\n'
-                    '.*matchingJobs.*\n')
+        expected = (
+            ".*matchingJobs.*\n"
+            ".*matchingJobs.*\n"
+            ".*matchingJobs.*\n"
+            ".*matchingJobs.*\n"
+            ".*matchingJobs.*\n"
+        )
         assert re.search(expected, out, re.DOTALL)
 
     eventually_consistent_test()

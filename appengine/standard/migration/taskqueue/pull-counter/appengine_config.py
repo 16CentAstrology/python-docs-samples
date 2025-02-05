@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.appengine.ext import vendor
 # appengine_config.py
 import pkg_resources
-from google.appengine.ext import vendor
 
 # Set path to your libraries folder.
-path = 'lib'
+path = "lib"
 
 # Add libraries installed in the path folder.
 vendor.add(path)

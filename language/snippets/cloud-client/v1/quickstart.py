@@ -18,10 +18,8 @@
 def run_quickstart():
     # [START language_quickstart]
     # Imports the Google Cloud client library
-    # [START language_python_migration_imports]
     from google.cloud import language_v1
 
-    # [END language_python_migration_imports]
     # Instantiates a client
     # [START language_python_migration_client]
     client = language_v1.LanguageServiceClient()
@@ -29,8 +27,8 @@ def run_quickstart():
 
     # The text to analyze
     text = "Hello, world!"
-    document = language_v1.Document(
-        content=text, type_=language_v1.Document.Type.PLAIN_TEXT
+    document = language_v1.types.Document(
+        content=text, type_=language_v1.types.Document.Type.PLAIN_TEXT
     )
 
     # Detects the sentiment of the text
@@ -38,8 +36,8 @@ def run_quickstart():
         request={"document": document}
     ).document_sentiment
 
-    print("Text: {}".format(text))
-    print("Sentiment: {}, {}".format(sentiment.score, sentiment.magnitude))
+    print(f"Text: {text}")
+    print(f"Sentiment: {sentiment.score}, {sentiment.magnitude}")
     # [END language_quickstart]
 
 

@@ -1,10 +1,10 @@
-# Copyright 2021 Google LLC. All rights reserved.
+# Copyright 2021 Google LLC.
 # Use of this source code is governed by the Apache 2.0
 # license that can be found in the LICENSE file.
 
 # Use the official Python image.
 # https://hub.docker.com/_/python
-FROM python:3.10
+FROM python:3.11
 
 # Send stdout/stderr out, do not buffer.
 ENV PYTHONUNBUFFERED 1

@@ -1,4 +1,4 @@
-# Copyright 2019 Google Inc. All Rights Reserved.
+# Copyright 2019 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ def airflow_database():
     # We use separate directory for local db path per session
     # by setting AIRFLOW_HOME env var, which is done in noxfile_config.py.
 
-    assert 'AIRFLOW_HOME' in os.environ
+    assert "AIRFLOW_HOME" in os.environ
 
     airflow_home = os.environ["AIRFLOW_HOME"]
     airflow_db = f"{airflow_home}/airflow.db"
